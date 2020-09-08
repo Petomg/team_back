@@ -1,7 +1,13 @@
 var express = require('express');
+var bodyParser = require('body-parser');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+
+var config = require('./config/config');
+var jwt = require('jsonwebtoken');
+var configDB = require('./config/database');
+
 
 let PORT = 5000;
 
@@ -13,9 +19,10 @@ var usersRouter = require('./routes/users');
 
 var app = express();
 
+
 app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -23,7 +30,9 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 
-mongoose.connect('mongodb://localhost:27017/teamlocaldb', {useNewUrlParser: true, useUnifiedTopology: true});
+
+
+mongoose.connect(configDB.url , {useNewUrlParser: true, useUnifiedTopology: true});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
@@ -35,5 +44,6 @@ db.once('open', function() {
 app.listen(PORT, function(){
     console.log(`Listenening on Port:${PORT}`);
 });
+
 
 module.exports = app;
